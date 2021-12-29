@@ -9,7 +9,7 @@ lazy val publishSettings = Seq(
   pomIncludeRepository := { _ => false },
   publishTo := sonatypePublishToBundle.value,
   licenses := Seq("Apache-2.0" -> url("http://opensource.org/licenses/Apache-2.0")),
-  homepage := Some(url("https://github.com/salesforce/telepathy")),
+  homepage := Some(url("https://github.com/salesforce/awesolog")),
   scmInfo := Some(
     ScmInfo(
       url("https://github.com/salesforce/awesolog"),

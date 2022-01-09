@@ -55,6 +55,7 @@ lazy val javaOnlySettings = Seq(
 lazy val root = (project in file(".")).
   settings(commonSettings: _*).
   settings(javaOnlySettings: _*).
+  settings(publishSettings: _*).
   settings(
     name := "awesolog",
     libraryDependencies ++= Seq(
@@ -62,4 +63,3 @@ lazy val root = (project in file(".")).
       logbackArtifact
     )
   )
-

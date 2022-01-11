@@ -1,5 +1,7 @@
 # awesolog
 
+[![CircleCI](https://circleci.com/gh/salesforce/awesolog.svg?style=svg)](https://circleci.com/gh/salesforce/awesolog)
+
 Policies for logback logger rolling appender that ships logs to S3. The program needs to be imported as a standard maven library.
 
 The `S3FixedWindowRollingPolicy` is implemented that extends [`FixedWindowRollingPolicy`](http://logback.qos.ch/apidocs/ch/qos/logback/core/rolling/FixedWindowRollingPolicy.html) in Logback, therefore the behaviour is the same between the two except for uploading the log files to s3. 

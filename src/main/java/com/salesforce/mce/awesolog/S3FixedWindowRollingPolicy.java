@@ -199,7 +199,7 @@ public class S3FixedWindowRollingPolicy extends FixedWindowRollingPolicy {
     }
 
     public String getAwsRoleToAssume() {
-        return awsSecretKey;
+        return awsAssumeRoleArn;
     }
 
     public void setAwsRoleToAssume(String awsAssumeRoleArn) {

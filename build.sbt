@@ -1,8 +1,10 @@
 val scala212 = "2.12.14"
+val awsVersion = "2.17.+"
 
-val scalaTestArtifact    = "org.scalatest"  %% "scalatest"        % "3.2.+" % Test
-val awsArtifact          = "com.amazonaws"  %  "aws-java-sdk-s3"  % "1.11.+"
-val logbackArtifact      = "ch.qos.logback" % "logback-classic"   % "1.2.+"
+val scalaTestArtifact = "org.scalatest"          %% "scalatest"        % "3.2.+" % Test
+val awsS3Artifact     = "software.amazon.awssdk" % "s3"                % awsVersion
+val awsStsArtifact    = "software.amazon.awssdk" % "sts"               % awsVersion
+val logbackArtifact   = "ch.qos.logback"         % "logback-classic"   % "1.2.+"
 
 lazy val publishSettings = Seq(
   publishMavenStyle := true,
@@ -59,7 +61,8 @@ lazy val root = (project in file(".")).
   settings(
     name := "awesolog",
     libraryDependencies ++= Seq(
-      awsArtifact,
+      awsS3Artifact,
+      awsStsArtifact,
       logbackArtifact
     )
   )

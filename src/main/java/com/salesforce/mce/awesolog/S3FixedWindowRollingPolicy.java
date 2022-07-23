@@ -15,10 +15,20 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.regions.Region;
+
+import software.amazon.awssdk.services.sts.StsClient;
+import software.amazon.awssdk.services.sts.model.AssumeRoleRequest;
+import software.amazon.awssdk.services.sts.auth.StsAssumeRoleCredentialsProvider;
+import software.amazon.awssdk.services.sts.StsClientBuilder;
+
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3ClientBuilder;
 
 import ch.qos.logback.core.rolling.FixedWindowRollingPolicy;
 import ch.qos.logback.core.rolling.helper.FileNamePattern;
@@ -30,30 +40,77 @@ public class S3FixedWindowRollingPolicy extends FixedWindowRollingPolicy {
 
     String awsAccessKey;
     String awsSecretKey;
+    String awsAssumeRoleArn;
     String s3BucketName;
     String s3FolderName;
     String s3Region;
 
     boolean rollingOnExit = true;
 
-    AmazonS3 s3Client;
+    S3Client s3Client;
 
-    protected AmazonS3 getS3Client() {
+    protected S3Client getS3Client() {
+
         if (s3Client == null) {
-            if (getAwsAccessKey() == null || getAwsSecretKey() == null || getS3Region() == null ) {
-                s3Client = AmazonS3ClientBuilder.defaultClient();
+
+            S3ClientBuilder s3ClientBuilder;
+            StsClientBuilder stsClientBuilder;
+
+            StaticCredentialsProvider staticCredentialsProvider = null;
+            StsClient stsClient = null;
+
+            if (getS3Region() != null) {
+                Region region = Region.of(getS3Region());
+                s3ClientBuilder = S3Client.builder().region(region);
+                stsClientBuilder = StsClient.builder().region(region);
             } else {
-                BasicAWSCredentials awsCredentials =
-                        new BasicAWSCredentials(getAwsAccessKey(), getAwsSecretKey());
-                AWSStaticCredentialsProvider awsStaticCredentialsProvider =
-                        new AWSStaticCredentialsProvider(awsCredentials);
-                s3Client = AmazonS3ClientBuilder
-                        .standard()
-                        .withRegion(getS3Region())
-                        .withForceGlobalBucketAccessEnabled(true)
-                        .withCredentials(awsStaticCredentialsProvider)
-                        .build();
+                s3ClientBuilder = S3Client.builder();
+                stsClientBuilder = StsClient.builder();
             }
+
+            if (getAwsAccessKey() != null && getAwsSecretKey() != null) {
+                staticCredentialsProvider = StaticCredentialsProvider.create(
+                    AwsBasicCredentials.create(getAwsAccessKey(), getAwsSecretKey())
+                );
+            }
+
+            if (staticCredentialsProvider != null) {
+                stsClient = stsClientBuilder
+                    .credentialsProvider(staticCredentialsProvider)
+                    .build();
+            }
+
+            if (getAwsRoleToAssume() != null) {
+
+                AssumeRoleRequest assumeRoleRequest =
+                    AssumeRoleRequest
+                        .builder()
+                        .roleArn(getAwsRoleToAssume())
+                        .roleSessionName("AwesologSession")
+                        .build();
+
+                StsAssumeRoleCredentialsProvider stsAssumeRoleCredentials =
+                    StsAssumeRoleCredentialsProvider
+                        .builder()
+                        .refreshRequest(assumeRoleRequest)
+                        .stsClient(stsClient)
+                        .build();
+
+                s3Client = s3ClientBuilder
+                    .credentialsProvider(stsAssumeRoleCredentials)
+                    .build();
+
+            } else {
+
+                if (staticCredentialsProvider != null) {
+                    s3Client = s3ClientBuilder
+                            .credentialsProvider(staticCredentialsProvider)
+                            .build();
+                } else {
+                    s3Client = s3ClientBuilder.build();
+                }
+            }
+
         }
         return s3Client;
     }
@@ -81,7 +138,15 @@ public class S3FixedWindowRollingPolicy extends FixedWindowRollingPolicy {
             addInfo("Uploading " + filename);
             Runnable uploader = () -> {
                 try {
-                    getS3Client().putObject(getS3BucketName(), s3Key, file);
+                    PutObjectRequest putObjectRequest = PutObjectRequest
+                        .builder()
+                        .bucket(getS3BucketName())
+                        .key(s3Key)
+                        .build();
+                    getS3Client().putObject(
+                        putObjectRequest,
+                        RequestBody.fromFile(file)
+                    );
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -131,6 +196,14 @@ public class S3FixedWindowRollingPolicy extends FixedWindowRollingPolicy {
 
     public void setAwsSecretKey(String awsSecretKey) {
         this.awsSecretKey = awsSecretKey;
+    }
+
+    public String getAwsRoleToAssume() {
+        return awsSecretKey;
+    }
+
+    public void setAwsRoleToAssume(String awsAssumeRoleArn) {
+        this.awsAssumeRoleArn = awsAssumeRoleArn;
     }
 
     public String getS3BucketName() {

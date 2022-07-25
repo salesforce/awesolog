@@ -16,13 +16,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import software.amazon.awssdk.core.sync.RequestBody;
-
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.S3Client;
 
 import ch.qos.logback.core.rolling.FixedWindowRollingPolicy;
 import ch.qos.logback.core.rolling.helper.FileNamePattern;
 import ch.qos.logback.core.rolling.RolloverFailure;
+
+import com.salesforce.mce.awesolog.aws.S3ClientConstructor;
 
 public class S3FixedWindowRollingPolicy extends FixedWindowRollingPolicy {
 
@@ -41,12 +42,12 @@ public class S3FixedWindowRollingPolicy extends FixedWindowRollingPolicy {
 
     protected S3Client getS3Client() {
         if (s3Client == null) {
-            s3Client = new AwsS3Client(
+            s3Client = new S3ClientConstructor(
                 getAwsAccessKey(),
                 getAwsAccessKey(),
                 getAwsRoleToAssume(),
                 getS3Region()
-            ).build();
+            ).construct();
         }
         return s3Client;
     }

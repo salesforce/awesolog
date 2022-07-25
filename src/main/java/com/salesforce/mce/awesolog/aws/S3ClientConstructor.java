@@ -1,4 +1,4 @@
-package com.salesforce.mce.awesolog;
+package com.salesforce.mce.awesolog.aws;
 
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -10,7 +10,7 @@ import software.amazon.awssdk.services.sts.StsClientBuilder;
 import software.amazon.awssdk.services.sts.auth.StsAssumeRoleCredentialsProvider;
 import software.amazon.awssdk.services.sts.model.AssumeRoleRequest;
 
-public class AwsS3Client {
+public class S3ClientConstructor {
 
     private final String awsAccessKey;
 
@@ -20,7 +20,7 @@ public class AwsS3Client {
 
     private final String s3Region;
 
-    public AwsS3Client(
+    public S3ClientConstructor(
         String awsAccessKey,
         String awsSecretKey,
         String awsAssumeRoleArn,
@@ -32,14 +32,17 @@ public class AwsS3Client {
         this.s3Region = s3Region;
     }
 
-    public S3Client build() {
+    public S3Client construct() {
 
         S3Client s3Client;
+        StsClient stsClient = null;
+
         S3ClientBuilder s3ClientBuilder;
         StsClientBuilder stsClientBuilder;
 
         StaticCredentialsProvider staticCredentialsProvider = null;
-        StsClient stsClient = null;
+
+        final String AssumeRoleSessionName = "AwesologSession";
 
         if (s3Region != null) {
             Region region = Region.of(s3Region);
@@ -68,7 +71,7 @@ public class AwsS3Client {
                 AssumeRoleRequest
                     .builder()
                     .roleArn(awsAssumeRoleArn)
-                    .roleSessionName("AwesologSession")
+                    .roleSessionName(AssumeRoleSessionName)
                     .build();
 
             StsAssumeRoleCredentialsProvider stsAssumeRoleCredentials =

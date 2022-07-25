@@ -12,13 +12,15 @@ import software.amazon.awssdk.services.sts.model.AssumeRoleRequest;
 
 public class S3ClientConstructor {
 
-    private final String awsAccessKey;
+    static final String ASSUME_ROLE_SESSION_NAME = "AwesologSession";
 
-    private final String awsSecretKey;
+    private String awsAccessKey;
 
-    private final String awsAssumeRoleArn;
+    private String awsSecretKey;
 
-    private final String s3Region;
+    private String awsAssumeRoleArn;
+
+    private String s3Region;
 
     public S3ClientConstructor(
         String awsAccessKey,
@@ -41,8 +43,6 @@ public class S3ClientConstructor {
         StsClientBuilder stsClientBuilder;
 
         StaticCredentialsProvider staticCredentialsProvider = null;
-
-        final String AssumeRoleSessionName = "AwesologSession";
 
         if (s3Region != null) {
             Region region = Region.of(s3Region);
@@ -71,7 +71,7 @@ public class S3ClientConstructor {
                 AssumeRoleRequest
                     .builder()
                     .roleArn(awsAssumeRoleArn)
-                    .roleSessionName(AssumeRoleSessionName)
+                    .roleSessionName(ASSUME_ROLE_SESSION_NAME)
                     .build();
 
             StsAssumeRoleCredentialsProvider stsAssumeRoleCredentials =

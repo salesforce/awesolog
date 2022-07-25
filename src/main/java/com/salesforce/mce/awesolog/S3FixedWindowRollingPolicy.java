@@ -44,7 +44,7 @@ public class S3FixedWindowRollingPolicy extends FixedWindowRollingPolicy {
         if (s3Client == null) {
             s3Client = new S3ClientConstructor(
                 getAwsAccessKey(),
-                getAwsAccessKey(),
+                getAwsSecretKey(),
                 getAwsRoleToAssume(),
                 getS3Region()
             ).construct();

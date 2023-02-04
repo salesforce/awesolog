@@ -10,6 +10,7 @@ package com.salesforce.mce.awesolog;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -68,27 +69,6 @@ public class S3FixedWindowRollingPolicy extends FixedWindowRollingPolicy {
         uploadFileToS3Async(rolledLogFileName);
     }
 
-    private static byte[] getFileBytes(File file) {
-        FileInputStream fileInputStream = null;
-        byte[] bytesArray = null;
-        try {
-            bytesArray = new byte[(int) file.length()];
-            fileInputStream = new FileInputStream(file.getPath());
-            fileInputStream.read(bytesArray);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (fileInputStream != null) {
-                try {
-                    fileInputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return bytesArray;
-    }
-
     protected void uploadFileToS3Async(String filename) {
         final File file = new File(filename);
         if (file.exists() && file.length() != 0) {
@@ -104,8 +84,9 @@ public class S3FixedWindowRollingPolicy extends FixedWindowRollingPolicy {
                             .bucket(getS3BucketName())
                             .key(s3Key)
                             .build(),
-                        RequestBody.fromBytes(
-                            getFileBytes(file)
+                        RequestBody.fromInputStream(
+                            new FileInputStream(file.getPath()),
+                            file.length()
                         )
                     );
                 } catch (Exception ex) {

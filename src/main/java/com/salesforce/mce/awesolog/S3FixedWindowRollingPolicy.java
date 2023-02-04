@@ -8,6 +8,8 @@
 package com.salesforce.mce.awesolog;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -66,6 +68,27 @@ public class S3FixedWindowRollingPolicy extends FixedWindowRollingPolicy {
         uploadFileToS3Async(rolledLogFileName);
     }
 
+    private static byte[] getFileBytes(File file) {
+        FileInputStream fileInputStream = null;
+        byte[] bytesArray = null;
+        try {
+            bytesArray = new byte[(int) file.length()];
+            fileInputStream = new FileInputStream(file.getPath());
+            fileInputStream.read(bytesArray);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fileInputStream != null) {
+                try {
+                    fileInputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return bytesArray;
+    }
+
     protected void uploadFileToS3Async(String filename) {
         final File file = new File(filename);
         if (file.exists() && file.length() != 0) {
@@ -75,14 +98,15 @@ public class S3FixedWindowRollingPolicy extends FixedWindowRollingPolicy {
             addInfo("Uploading " + filename);
             Runnable uploader = () -> {
                 try {
-                    PutObjectRequest putObjectRequest = PutObjectRequest
-                        .builder()
-                        .bucket(getS3BucketName())
-                        .key(s3Key)
-                        .build();
                     getS3Client().putObject(
-                        putObjectRequest,
-                        RequestBody.fromFile(file)
+                        PutObjectRequest
+                            .builder()
+                            .bucket(getS3BucketName())
+                            .key(s3Key)
+                            .build(),
+                        RequestBody.fromBytes(
+                            getFileBytes(file)
+                        )
                     );
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -115,8 +139,8 @@ public class S3FixedWindowRollingPolicy extends FixedWindowRollingPolicy {
 
     private static String stripSuffix(String input, String suffix) {
         return (input == null || input.length() == 0)
-                ? null
-                : (input.endsWith(suffix) ? input.substring(0, input.length() - 1) : input);
+            ? null
+            : (input.endsWith(suffix) ? input.substring(0, input.length() - 1) : input);
     }
 
     public String getAwsAccessKey() {

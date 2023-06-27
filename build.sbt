@@ -1,10 +1,10 @@
 val scala212 = "2.12.14"
-val awsVersion = "2.19.+"
+val awsVersion = "2.19.33"
 
-val scalaTestArtifact = "org.scalatest"          %% "scalatest"        % "3.2.+" % Test
+val scalaTestArtifact = "org.scalatest"          %% "scalatest"        % "3.2.16" % Test
 val awsS3Artifact     = "software.amazon.awssdk" % "s3"                % awsVersion
 val awsStsArtifact    = "software.amazon.awssdk" % "sts"               % awsVersion
-val logbackArtifact   = "ch.qos.logback"         % "logback-classic"   % "1.3.+"
+val logbackArtifact   = "ch.qos.logback"         % "logback-classic"   % "1.3.8"
 
 lazy val publishSettings = Seq(
   publishMavenStyle := true,

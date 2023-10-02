@@ -32,6 +32,7 @@ public class S3FixedWindowRollingPolicy extends FixedWindowRollingPolicy {
 
     String awsAccessKey;
     String awsSecretKey;
+    String awsSessionToken;
     String awsAssumeRoleArn;
     String s3BucketName;
     String s3FolderName;
@@ -46,6 +47,7 @@ public class S3FixedWindowRollingPolicy extends FixedWindowRollingPolicy {
             s3Client = new S3ClientConstructor(
                 getAwsAccessKey(),
                 getAwsSecretKey(),
+                getAwsSessionToken(),
                 getAwsRoleToAssume(),
                 getS3Region()
             ).construct();
@@ -136,6 +138,14 @@ public class S3FixedWindowRollingPolicy extends FixedWindowRollingPolicy {
 
     public void setAwsSecretKey(String awsSecretKey) {
         this.awsSecretKey = awsSecretKey;
+    }
+
+    public String getAwsSessionToken() {
+        return awsSessionToken;
+    }
+
+    public void setAwsSessionToken(String awsSessionToken) {
+        this.awsSessionToken = awsSessionToken;
     }
 
     public String getAwsRoleToAssume() {

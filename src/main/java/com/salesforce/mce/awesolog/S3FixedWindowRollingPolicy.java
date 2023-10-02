@@ -140,9 +140,13 @@ public class S3FixedWindowRollingPolicy extends FixedWindowRollingPolicy {
         this.awsSecretKey = awsSecretKey;
     }
 
-    public String getAwsSessionToken() { return awsSessionToken; }
+    public String getAwsSessionToken() {
+        return awsSessionToken;
+    }
 
-    public void setAwsSessionToken(String awsSessionToken) { this.awsSessionToken = awsSessionToken; }
+    public void setAwsSessionToken(String awsSessionToken) {
+        this.awsSessionToken = awsSessionToken;
+    }
 
     public String getAwsRoleToAssume() {
         return awsAssumeRoleArn;

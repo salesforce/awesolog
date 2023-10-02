@@ -1,6 +1,8 @@
 package com.salesforce.mce.awesolog.aws;
 
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.AwsCredentials;
+import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -18,6 +20,8 @@ public class S3ClientConstructor {
 
     private String awsSecretKey;
 
+    private String awsSessionToken;
+
     private String awsAssumeRoleArn;
 
     private String s3Region;
@@ -25,11 +29,13 @@ public class S3ClientConstructor {
     public S3ClientConstructor(
         String awsAccessKey,
         String awsSecretKey,
+        String awsSessionToken,
         String awsAssumeRoleArn,
         String s3Region
     ) {
         this.awsAccessKey = awsAccessKey;
         this.awsSecretKey = awsSecretKey;
+        this.awsSessionToken = awsSessionToken;
         this.awsAssumeRoleArn = awsAssumeRoleArn;
         this.s3Region = s3Region;
     }
@@ -54,9 +60,13 @@ public class S3ClientConstructor {
         }
 
         if (awsAccessKey != null && awsSecretKey != null) {
-            staticCredentialsProvider = StaticCredentialsProvider.create(
-                AwsBasicCredentials.create(awsAccessKey, awsSecretKey)
-            );
+            AwsCredentials awsCredentials;
+            if (awsSessionToken != null) {
+                awsCredentials = AwsSessionCredentials.create(awsAccessKey, awsSecretKey, awsSessionToken);
+            } else {
+                awsCredentials = AwsBasicCredentials.create(awsAccessKey, awsSecretKey);
+            }
+            staticCredentialsProvider = StaticCredentialsProvider.create(awsCredentials);
         }
 
         if (staticCredentialsProvider != null) {

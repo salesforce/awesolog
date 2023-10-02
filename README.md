@@ -12,6 +12,7 @@ Key values are used in default config (usually `application.conf`) before gettin
 | :----- | :-------- | 
 | awsAccessKey | aws_access_key_id |
 | awsSecretKey | aws_secret_access_key |
+| awsSessionToken | aws_session_token |
 | awsAssumeRoleArn | aws_assume_role_arn |
 | s3BucketName | s3_egress_bucket|
 | s3FolderName | s3_log_folder_path |
@@ -39,6 +40,7 @@ An example logback.xml that uses `S3FixedWindowRollingPolicy` with `RollingFileA
         <fileNamePattern>/log/myapp-log-%i.gz</fileNamePattern>
         <awsAccessKey>accesskey</awsAccessKey>
         <awsSecretKey>secretkey</awsSecretKey>
+        <awsSessionToken>sessiontoken</awsSessionToken>
         <awsAssumeRoleArn>assumeRole</awsAssumeRoleArn>
         <s3BucketName>bucketName</s3BucketName>
         <s3FolderName>logs</s3FolderName>
@@ -60,6 +62,15 @@ Use AWS access key and secret access key for S3 Client, set below:
 aws_access_key_id = xxxxxxxxxxxxx
 aws_secret_access_key = xxxxxxxxxxxxx
 ```
+
+Use AWS access key, secret access key and session token for S3 Client, set below:
+
+```conf
+aws_access_key_id = xxxxxxxxxxxxx
+aws_secret_access_key = xxxxxxxxxxxxx
+aws_session_token = xxxxxxxxxxxxx
+```
+
 
 To use AWS role to assume for S3 Client, set below:
 

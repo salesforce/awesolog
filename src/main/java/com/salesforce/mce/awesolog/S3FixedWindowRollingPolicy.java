@@ -16,13 +16,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.http.impl.client.SystemDefaultCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3ClientBuilder;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+
 import ch.qos.logback.core.rolling.FixedWindowRollingPolicy;
 import ch.qos.logback.core.rolling.helper.FileNamePattern;
 import ch.qos.logback.core.rolling.RolloverFailure;
@@ -33,22 +33,36 @@ public class S3FixedWindowRollingPolicy extends FixedWindowRollingPolicy {
 
     ExecutorService executor = Executors.newFixedThreadPool(1);
 
+    String awsAccessKey;
+    String awsSecretKey;
+    String awsSessionToken;
+    String awsAssumeRoleArn;
     String s3BucketName;
     String s3FolderName;
-
-    S3Client s3Client;
+    String s3Region;
 
     boolean rollingOnExit = true;
 
+    S3Client s3Client;
+
     protected S3Client getS3Client() {
         if (s3Client == null) {
-            S3ClientBuilder s3ClientBuilder = S3Client.builder();
-            AwsCredentialsProvider awsCredentialsProvider = DefaultCredentialsProvider.create();
-            s3ClientBuilder = s3ClientBuilder.credentialsProvider(awsCredentialsProvider);
-            return s3ClientBuilder.build();
-        } else {
-            return s3Client;
+            if( isLogbackCredentialPropertiesSet()) {
+                s3Client = new S3ClientConstructor(
+                        getAwsAccessKey(),
+                        getAwsSecretKey(),
+                        getAwsSessionToken(),
+                        getAwsRoleToAssume(),
+                        getS3Region()
+                ).construct();
+            } else {
+                S3ClientBuilder s3ClientBuilder = S3Client.builder();
+                AwsCredentialsProvider awsCredentialsProvider = DefaultCredentialsProvider.create();
+                s3ClientBuilder = s3ClientBuilder.credentialsProvider(awsCredentialsProvider);
+                s3Client = s3ClientBuilder.build();
+            }
         }
+        return s3Client;
     }
 
     @Override
@@ -120,6 +134,38 @@ public class S3FixedWindowRollingPolicy extends FixedWindowRollingPolicy {
             : (input.endsWith(suffix) ? input.substring(0, input.length() - 1) : input);
     }
 
+    public String getAwsAccessKey() {
+        return awsAccessKey;
+    }
+
+    public void setAwsAccessKey(String awsAccessKey) {
+        this.awsAccessKey = awsAccessKey;
+    }
+
+    public String getAwsSecretKey() {
+        return awsSecretKey;
+    }
+
+    public void setAwsSecretKey(String awsSecretKey) {
+        this.awsSecretKey = awsSecretKey;
+    }
+
+    public String getAwsSessionToken() {
+        return awsSessionToken;
+    }
+
+    public void setAwsSessionToken(String awsSessionToken) {
+        this.awsSessionToken = awsSessionToken;
+    }
+
+    public String getAwsRoleToAssume() {
+        return awsAssumeRoleArn;
+    }
+
+    public void setAwsRoleToAssume(String awsAssumeRoleArn) {
+        this.awsAssumeRoleArn = awsAssumeRoleArn;
+    }
+
     public String getS3BucketName() {
         return s3BucketName;
     }
@@ -136,11 +182,25 @@ public class S3FixedWindowRollingPolicy extends FixedWindowRollingPolicy {
         this.s3FolderName = s3FolderName;
     }
 
+    public String getS3Region() {
+        return s3Region;
+    }
+
+    public void setS3Region(String s3Region) {
+        this.s3Region = s3Region;
+    }
+
     public boolean isRollingOnExit() {
         return rollingOnExit;
     }
 
     public void setRollingOnExit(boolean rollingOnExit) {
         this.rollingOnExit = rollingOnExit;
+    }
+
+    public boolean isLogbackCredentialPropertiesSet() {
+        return ( (!getAwsAccessKey().equals(null) && !getAwsAccessKey().isEmpty())
+                 && (!getAwsSecretKey().equals(null) && !getAwsSecretKey().isEmpty()))
+               || (!getAwsSessionToken().equals(null) && !getAwsSessionToken().isEmpty());
     }
 }

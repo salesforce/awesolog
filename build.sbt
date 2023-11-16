@@ -1,4 +1,5 @@
-val scala213 = "2.13.12"
+val scala212Version = "2.12.14"
+val scala213Version = "2.13.12"
 val awsVersion = "2.21.24"
 
 val scalaTestArtifact = "org.scalatest"          %% "scalatest"        % "3.2.16" % Test
@@ -30,22 +31,32 @@ lazy val publishSettings = Seq(
       name = "Damian Xu",
       email = "damian.xu@salesforce.com",
       url = url("http://github.com/damianxu88")
+    ),
+    Developer(
+      id = "steveblackmon",
+      name = "Steve Blackmon",
+      email = "sblackmon@apache.org",
+      url = url("http://github.com/steveblackmon")
     )
   ),
   useGpgPinentry := true
 )
 
 lazy val commonSettings = Seq(
-  scalacOptions ++= Seq("-deprecation", "-feature", "-Xlint", "-Xfatal-warnings"),
-  scalaVersion := scala213,
+  scalaVersion := scala212Version,
   libraryDependencies += scalaTestArtifact,
+  crossScalaVersions := Seq(
+    scala212Version,
+    scala213Version
+  ),
+  scalacOptions ++= Seq("-deprecation", "-feature", "-Xlint", "-Xfatal-warnings"),
   organization := "com.salesforce.mce",
   headerLicense := Some(HeaderLicense.Custom(
-  """|Copyright (c) 2021, salesforce.com, inc.
-     |All rights reserved.
-     |SPDX-License-Identifier: BSD-3-Clause
-     |For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
-     |""".stripMargin
+    """|Copyright (c) 2021, salesforce.com, inc.
+       |All rights reserved.
+       |SPDX-License-Identifier: BSD-3-Clause
+       |For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+       |""".stripMargin
   ))
 )
 

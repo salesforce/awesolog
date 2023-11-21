@@ -61,7 +61,7 @@ lazy val javaOnlySettings = Seq(
   crossPaths := false
 )
 
-lazy val root = ((project in file(".")).
+lazy val root = (project in file(".")).
   settings(commonSettings: _*).
   settings(javaOnlySettings: _*).
   settings(publishSettings: _*).
@@ -76,5 +76,5 @@ lazy val root = ((project in file(".")).
       scalaTestArtifact
     ),
     Test / testOptions := Seq (Tests.Argument(TestFrameworks.JUnit, "-a"))
-  ))
+  )
 

@@ -64,10 +64,6 @@ public class S3ClientConstructor {
             Region region = Region.of(s3Region);
             s3ClientBuilder = s3ClientBuilder.region(region).forcePathStyle(true);
             stsClientBuilder = stsClientBuilder.region(region);
-        } else {
-            Region region = Region.US_WEST_2;
-            s3ClientBuilder = s3ClientBuilder.region(region).forcePathStyle(true);
-            stsClientBuilder = stsClientBuilder.region(region);
         }
 
         if( s3Endpoint != null ) {

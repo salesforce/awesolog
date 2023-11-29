@@ -60,9 +60,11 @@ public class S3ClientConstructor {
 
         StaticCredentialsProvider staticCredentialsProvider = null;
 
+        s3ClientBuilder = s3ClientBuilder.forcePathStyle(true);
+
         if (s3Region != null) {
             Region region = Region.of(s3Region);
-            s3ClientBuilder = s3ClientBuilder.region(region).forcePathStyle(true);
+            s3ClientBuilder = s3ClientBuilder.region(region);
             stsClientBuilder = stsClientBuilder.region(region);
         }
 

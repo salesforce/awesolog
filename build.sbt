@@ -1,7 +1,9 @@
-val scala212 = "2.12.14"
-val awsVersion = "2.19.33"
+val scala213 = "2.13.12"
+val awsVersion = "2.21.24"
 
 val scalaTestArtifact = "org.scalatest"          %% "scalatest"        % "3.2.16" % Test
+val junitArtifact     = "junit"                  % "junit"             % "4.11" % Test
+val junitInterface    = "com.github.sbt"         % "junit-interface"   % "0.13.2" % Test
 val awsS3Artifact     = "software.amazon.awssdk" % "s3"                % awsVersion
 val awsStsArtifact    = "software.amazon.awssdk" % "sts"               % awsVersion
 val logbackArtifact   = "ch.qos.logback"         % "logback-classic"   % "1.3.8"
@@ -37,16 +39,21 @@ lazy val publishSettings = Seq(
 
 lazy val commonSettings = Seq(
   scalacOptions ++= Seq("-deprecation", "-feature", "-Xlint", "-Xfatal-warnings"),
-  scalaVersion := scala212,
+  scalaVersion := scala213,
   libraryDependencies += scalaTestArtifact,
   organization := "com.salesforce.mce",
   headerLicense := Some(HeaderLicense.Custom(
-  """|Copyright (c) 2021, salesforce.com, inc.
-     |All rights reserved.
-     |SPDX-License-Identifier: BSD-3-Clause
-     |For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
-     |""".stripMargin
-  ))
+    """|Copyright (c) 2021, salesforce.com, inc.
+       |All rights reserved.
+       |SPDX-License-Identifier: BSD-3-Clause
+       |For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+       |""".stripMargin
+  )),
+  Test / sourceDirectories := baseDirectory { base =>
+    Seq(
+      base / "src/test/java",
+    )
+  }.value
 )
 
 lazy val javaOnlySettings = Seq(
@@ -63,6 +70,11 @@ lazy val root = (project in file(".")).
     libraryDependencies ++= Seq(
       awsS3Artifact,
       awsStsArtifact,
-      logbackArtifact
-    )
+      logbackArtifact,
+      junitArtifact,
+      junitInterface,
+      scalaTestArtifact
+    ),
+    Test / testOptions := Seq (Tests.Argument(TestFrameworks.JUnit, "-a"))
   )
+

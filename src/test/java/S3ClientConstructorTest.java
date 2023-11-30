@@ -6,6 +6,7 @@ import software.amazon.awssdk.services.s3.model.GetUrlRequest;
 import java.net.URL;
 
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class S3ClientConstructorTest {
@@ -18,6 +19,29 @@ public class S3ClientConstructorTest {
                 null,
                 null,
                 null,
+                null
+        ).construct();
+        assert(s3Client != null);
+        GetUrlRequest.Builder getUrlRequestBuilder = GetUrlRequest.builder();
+        GetUrlRequest getUrlRequest = getUrlRequestBuilder
+                .bucket("bucket")
+                .key("key")
+                .build();
+        URL urlRequest = s3Client.utilities().getUrl(getUrlRequest);
+        String host = urlRequest.getHost();
+        assertTrue(host.startsWith("s3"));
+        assertTrue(host.endsWith("amazonaws.com"));
+        assertEquals("/bucket/key", urlRequest.getPath());
+    }
+
+    @Test
+    public void testRegionOnly() {
+        S3Client s3Client = new S3ClientConstructor(
+                null,
+                null,
+                null,
+                null,
+                "us-west-2",
                 null
         ).construct();
         assert(s3Client != null);
